@@ -4,6 +4,7 @@ import AuthReducer from "./AuthReducer";
 const INITIAL_STATE = {
   currentUser: JSON.parse(localStorage.getItem("user")) || null,
 };
+console.log(INITIAL_STATE)
 
 export const AuthContext = createContext(INITIAL_STATE);
 

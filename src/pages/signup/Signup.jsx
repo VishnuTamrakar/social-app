@@ -1,52 +1,69 @@
-import { useContext, useState } from "react";
-import "./signup.scss";
-import {  createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
-import { useNavigate } from "react-router-dom";
-import {AuthContext} from "../../context/AuthContext"
-import {Link } from "react-router-dom"
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Form, Alert, Container } from "react-bootstrap";
+import { Button } from "react-bootstrap";
+import { createUserWithEmailAndPassword} from 'firebase/auth'
+import {auth} from '../../firebase'
+
+
 
 const Signup = () => {
-  const [error, setError] = useState(false);
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [password, setPassword] = useState("");
 
-  const navitage = useNavigate()
+  let navigate = useNavigate();
+  function signUp(email, password) {
+    return createUserWithEmailAndPassword(auth, email, password);
+  }
 
-  const {dispatch} = useContext(AuthContext)
-
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        dispatch({type:"LOGIN", payload:user})
-        navitage("/login")
-      })
-      .catch((error) => {
-        setError(true);
-      });
+    setError("");
+    try {
+      await signUp(email, password);
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
-    <div className="login">
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">signup</button>
-          if already have and account? <Link to="/login" >Login</Link>
-      </form>
-    </div>
+    <>
+    <Container style={{width:'400px'}}>
+      <div className="p-4 box">
+        <h2 className="mb-3">Firebase Auth Signup</h2>
+        {error && <Alert variant="danger">{error}</Alert>}
+        <Form  onSubmit={handleSubmit}>
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Control
+              type="email"
+              placeholder="Email address"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Control
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Form.Group>
+
+          <div className="d-grid gap-2">
+            <Button variant="primary" type="Submit"
+           >
+              Sign up
+            </Button>
+          </div>
+        </Form>
+      </div>
+      <div className="p-4 box mt-3 text-center">
+        Already have an account? <Link to="/login">Log In</Link>
+      </div>
+      </Container>
+    </>
   );
 };
 
